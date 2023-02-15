@@ -3,6 +3,9 @@ using RequestService.Policies;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddHttpClient("Test").AddPolicyHandler(
+    request => request.Method == HttpMethod.Get ? new ClientPolicy().ImmediateHttpRetry : new ClientPolicy().ImmediateHttpRetry);
+
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<ClientPolicy>(new ClientPolicy());
 
