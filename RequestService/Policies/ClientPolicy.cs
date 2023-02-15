@@ -7,7 +7,7 @@ namespace RequestService.Policies
     {
         public AsyncRetryPolicy<HttpResponseMessage> ImmediateHttpRetry { get; }
         public AsyncRetryPolicy<HttpResponseMessage> LinearHttpRetry { get; }
-
+        public AsyncRetryPolicy<HttpResponseMessage> ExponentialHttpRetry { get; }
         
         public ClientPolicy()
         {
@@ -18,6 +18,10 @@ namespace RequestService.Policies
             LinearHttpRetry = Policy.HandleResult<HttpResponseMessage>(
                 res => !res.IsSuccessStatusCode)
                 .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(3));
+            
+            ExponentialHttpRetry = Policy.HandleResult<HttpResponseMessage>(
+                res => !res.IsSuccessStatusCode)
+                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
         }
     }
 }
