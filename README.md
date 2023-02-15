@@ -1,5 +1,5 @@
-#Tratamento de falhas com Polly - .NET 6
->"Se na primeira tentativa você não conseguir, tente de novo, e de novo, e de novo..."
+# Tratamento de falhas com Polly - .NET 6
+> "Se na primeira tentativa você não conseguir, tente de novo, e de novo, e de novo..."
 
 Tratamento de falhas transitórias : tratamento de falhas de transição
 O que vamos cobrir?
@@ -7,7 +7,7 @@ O que vamos cobrir?
 - As políticas que podem ser usadas para manipular falhas transitórias
 - Como podemos usar Polly para implementar essas políticas (em .NET)
 
-###Ingredientes
+### Ingredientes
 - .NET 6 SDK (free)
 - VSCode (free)
 - API Client, e.g.: Insomnia ou Postman (free)
@@ -17,7 +17,7 @@ _adjetivo_
 Durar apenas por um curto período de tempo
 - Impermanente
 
-###O que são falhas transitórias?
+### O que são falhas transitórias?
 Transients faults relate to fault occurrences that exist for short periods of time, example are:
 As falhas transitórias referem-se a ocorrências de falhas que existem por curtos períodos de tempo, exemplos são:
 - Uma conexão de rede não está disponível durante a reinicialização de um roteador
@@ -25,13 +25,13 @@ As falhas transitórias referem-se a ocorrências de falhas que existem por curt
 - Inicialização do microsserviço
 - Servidor recusando conexões devido ao esgotamento do pool de conexões
 
-###Por que nos importamos?
+### Por que nos importamos?
 - Em vez de obter uma resposta de erro e aceitar a falha
 - Poderíamos eventualmente ter uma resposta de sucesso
 
 Isso é particularmente vantajoso em arquiteturas de aplicativos distribuídos
 
-##Tratamento de falhas transitórias
+## Tratamento de falhas transitórias
 Vamos nos concentrar nas variações da política de repetição:
 - Tentando a requisição de novo, (e de novo?), pra ver se dá certo dessa vez...
 
@@ -39,14 +39,17 @@ Nós podemos configurar:
 - Número de repetição (provavelmente não queremos tentar para sempre)
 - Intervalo de tempo entre as retentativas (constante ou variável)
 
-##Política
-###Policy 1: Retry Immediately
+## Política
+### Policy 1: Retry Immediately
+![image](https://user-images.githubusercontent.com/58392536/218931354-5fd7994a-bfcf-4ff1-afc8-81386f6de17a.png)
 
-###Policy 2: Retry 5x and Wait 3s
+### Policy 2: Retry 5x and Wait 3s
+![image](https://user-images.githubusercontent.com/58392536/218931441-285479c9-302e-4c97-a069-4e7960106817.png)
 
-###Policy 3: Retry 5x with Exponential Backoff
+### Policy 3: Retry 5x with Exponential Backoff
+![image](https://user-images.githubusercontent.com/58392536/218931528-15b2b4b6-92b8-43d0-a398-b025c1549694.png)
 
-##O que é Polly?
+## O que é Polly?
 - A biblioteca "de fato" de resiliência e tratamento de falhas transitórias para .NET 
 - Podemos usá-lo para criar Políticas em nossos aplicativos .NET
 - Este vídeo é realmente uma rampa de acesso para você usar
@@ -56,8 +59,8 @@ Nós podemos configurar:
 
 Mais Informações: https://github.com/App-VNext/Polly
 
-#Code
-##Response
+# Code
+## Response
 ```C#
 using Microsoft.AspNetCore.Mvc;
 
@@ -86,7 +89,7 @@ namespace ResponseService.Controllers
     }
 }
 ```
-##Request
+## Request
 ```c#
 using Microsoft.AspNetCore.Mvc;
 
@@ -116,9 +119,9 @@ namespace RequestService.Controllers
 }
 ```
 
-##Polly
-###Class - Definindo as políticas do ClientPolly em classe
-####Tente 5x imediatamente
+## Polly
+### Class - Definindo as políticas do ClientPolly em classe
+#### Tente 5x imediatamente
 ```c#
 using Polly;
 using Polly.Retry;
@@ -139,7 +142,7 @@ namespace RequestService.Policies
 }
 ```
 
-####Tente 5x com intervalo de 3 segundos
+#### Tente 5x com intervalo de 3 segundos
 ```c#
 using Polly;
 using Polly.Retry;
@@ -160,7 +163,7 @@ namespace RequestService.Policies
 }
 ```
 
-####Tente 5x com intervalo exponencial
+#### Tente 5x com intervalo exponencial
 ```c#
 public class ClientPolicy
     {
@@ -175,7 +178,7 @@ public class ClientPolicy
     }
 ```
 
-###Program - Adicionando no Container de Serviço
+### Program - Adicionando no Container de Serviço
 Registra a classe ClientPolicy para que fique disponível para uso através de Injeção de Dependência
 ```c#
 using RequestService.Policies;
@@ -202,8 +205,8 @@ app.MapControllers();
 app.Run();
 ```
 
-###Controller - Uso de Polly através de Injeção de Dependência
-####Injeção via Construtor
+### Controller - Uso de Polly através de Injeção de Dependência
+#### Injeção via Construtor
 ```c#
 namespace RequestService.Controllers
 {
@@ -226,7 +229,7 @@ namespace RequestService.Controllers
 }
 ```
 
-####Policy Immediate 
+#### Policy Immediate 
 ```c#
 [HttpGet]
 public async Task<ActionResult> MakeRequest()
@@ -246,7 +249,7 @@ public async Task<ActionResult> MakeRequest()
 }
 ```
 
-####Policy Linear 
+#### Policy Linear 
 ```c#
 [HttpGet]
 public async Task<ActionResult> MakeRequest()
@@ -266,7 +269,7 @@ public async Task<ActionResult> MakeRequest()
 }
 ```
 
-####Policy Exponential 
+#### Policy Exponential 
 ```c#
 public async Task<ActionResult> MakeRequest()
 {
@@ -285,8 +288,8 @@ public async Task<ActionResult> MakeRequest()
 }
 ```
 
-##HttpClient Factory
-###Program
+## HttpClient Factory
+### Program
 ```c#
 using RequestService.Policies;
 
@@ -313,7 +316,7 @@ app.MapControllers();
 app.Run();
 ```
 
-###Controller
+### Controller
 ```c#
 using Microsoft.AspNetCore.Mvc;
 using RequestService.Policies;
@@ -353,8 +356,8 @@ namespace RequestService.Controllers
 }
 ```
 
-###Refatorando HttpFactory
-####Controller 
+### Refatorando HttpFactory
+#### Controller 
 ```c#
 using Microsoft.AspNetCore.Mvc;
 
@@ -389,7 +392,7 @@ namespace RequestService.Controllers
 }
 ```
 
-####Program
+#### Program
 ```c#
 using RequestService.Policies;
 
